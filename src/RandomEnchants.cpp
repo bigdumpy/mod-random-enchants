@@ -5,6 +5,9 @@
 #include "Player.h"
 #include "Configuration/Config.h"
 #include "Chat.h"
+#include <iostream>
+#include <string>
+using namespace std;
 
 class RandomEnchantsPlayer : public PlayerScript{
 public:
@@ -34,27 +37,29 @@ public:
 	{
 		uint32 Quality = item->GetTemplate()->Quality;
 		uint32 Class = item->GetTemplate()->Class;
+		ChatHandler chathandle = ChatHandler(player->GetSession());
 
-		if (
-            (Quality > 5 || Quality < 1) /* eliminates enchanting anything that isn't a recognized quality */ ||
-            (Class != 2 && Class != 4) /* eliminates enchanting anything but weapons/armor */)
+		if (Class != 2 && Class != 4) /* eliminates enchanting anything but weapons/armor */
         {
+			chathandle.PSendSysMessage("Bad luck ite does not fit %.0lf", Quality);
 			return;
         }
 
 		int slotRand[3] = { -1, -1, -1 };
 		uint32 slotEnch[3] = { 0, 1, 5 };
-		double roll1 = 70.0; // rand_chance()
+		float roll1 = 70.0; // rand_chance()
+		chathandle.PSendSysMessage("Rolled succsesfully ench: %.0lf", roll1);
 		if (roll1 >= 70.0)
 			slotRand[0] = getRandEnchantment(item);
+			chathandle.PSendSysMessage("Rolled succsesfully ench: %s", item->GetTemplate()->Name1.c_str());
 		if (slotRand[0] != -1)
 		{
-			double roll2 = 65.0; // rand_chance()
+			float roll2 = 65.0; // rand_chance()
 			if (roll2 >= 65.0)
 				slotRand[1] = getRandEnchantment(item);
 			if (slotRand[1] != -1)
 			{
-				double roll3 = 65.0; // rand_chance()
+				float roll3 = 65.0; // rand_chance()
 				if (roll3 >= 60.0)
 					slotRand[2] = getRandEnchantment(item);
 			}
@@ -71,7 +76,7 @@ public:
 				}
 			}
 		}
-		ChatHandler chathandle = ChatHandler(player->GetSession());
+		//ChatHandler chathandle = ChatHandler(player->GetSession());
 		if (slotRand[2] != -1)
 			chathandle.PSendSysMessage("Newly Acquired |cffFF0000 %s |rhas received|cffFF0000 3 |rrandom enchantments!", item->GetTemplate()->Name1.c_str());
 		else if(slotRand[1] != -1)
@@ -117,6 +122,8 @@ public:
 			rarityRoll = 93;
 			break;
 		}
+
+		cout << rarityRoll << endl; 
 		if (rarityRoll < 0)
 			return -1;
 		int tier = 0;
